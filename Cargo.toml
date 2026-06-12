@@ -1,0 +1,33 @@
+[package]
+name = "pivx-walletd"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Stateless PIVX Sapling address-derivation service for watch-only payment processing"
+repository = "https://github.com/Liquid369/pivx-walletd"
+
+[dependencies]
+axum = "0.7"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+# PIVX-rebased librustzcash, same stack PIVX-Labs/pivx-shield uses.
+# Carries the PIVX constants: HRP "ps"/"pxviews", coin type 119.
+zcash_keys = { git = "https://github.com/Duddino/librustpivx", branch = "librustzcash-rebase", features = ["sapling"] }
+sapling = { git = "https://github.com/Duddino/librustpivx", branch = "librustzcash-rebase" }
+zip32 = "0.1"
+
+[profile.release]
+lto = true
+strip = true
+
+# Mirrors PIVX-Labs/pivx-shield's patch set, plus core2:
+# - core2 0.3.x is yanked from crates.io; fetch the same version from its git tag
+# - redjubjub needs the ZcashFoundation rev that has the "std" feature
+[patch.crates-io]
+core2 = { git = "https://github.com/technocreatives/core2", tag = "v0.3.3" }
+redjubjub = { git = "https://github.com/ZcashFoundation/redjubjub", rev = "eae848c5c14d9c795d000dd9f4c4762d1aee7ee1" }
+bellman = { git = "https://github.com/Duddino/librustpivx", branch = "librustzcash-rebase" }
